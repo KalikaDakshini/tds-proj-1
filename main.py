@@ -1,15 +1,13 @@
 """Main file of the application."""
 
-from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from app.routes import router
+from app.services.llm import generate_app
 
 
 app = FastAPI()
 app.include_router(router)
-
-load_dotenv()
 
 
 @app.get("/")

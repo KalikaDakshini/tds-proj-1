@@ -1,11 +1,11 @@
 """App routes module"""
 
-import os
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from .models import Payload
 from .services.gh_actions import create_repo
+from .config import Environ
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ async def build(request: Payload, tasks: BackgroundTasks):
     """App build endpoint"""
 
     # Get and validate secret key
-    secret_key = os.getenv("API_SECRET")
+    secret_key = Environ.API_SECRET
     if not secret_key:
         raise ValueError("API_SECRET environment variable not set")
 

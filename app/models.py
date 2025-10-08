@@ -15,3 +15,11 @@ class Payload(BaseModel):
     checks: list[str]
     evaluation_url: str
     attachments: list[dict]
+
+
+class LLMResponse(BaseModel):
+    """Model for LLM response"""
+
+    README: str = Field(..., alias="README.md")
+    License: str = Field(..., alias="LICENSE")
+    main_code: str = Field(..., alias="main.py")

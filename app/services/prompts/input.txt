@@ -1,0 +1,8 @@
+App brief:
+{brief}
+
+Requirements:
+- Code must run or render directly with no external files.
+- README.md must include summary, setup, usage, and license section.
+- LICENSE must be MIT.
+- Keep code concise and well-commented.

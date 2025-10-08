@@ -9,3 +9,8 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# Temporary texts
+in.txt
+out.txt
+err.txt
