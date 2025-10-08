@@ -1,0 +1,12 @@
+# Python files
+*/__pycache__
+*.py[co]
+
+# Git files
+.git
+.gitignore
+
+# Virtual environments
+.venv
+# Remove .env files when deploying to production
+# .env 
