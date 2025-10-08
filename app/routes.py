@@ -4,7 +4,8 @@ from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from .models import Payload
-from .services.gh_actions import create_repo
+from .services.gh_actions import create_repo, push_code
+from .services.llm import generate_app
 from .config import Environ
 
 router = APIRouter()
@@ -15,16 +16,19 @@ def process_request(request: Payload):
     # 4 - Parse the request and attachments
 
     # 4 - Use LLM to generate app
+    llm_response = generate_app(request.brief)
 
     # 5 - Create Github repo
     repo = create_repo(request.task)
     print(f"Repository '{repo.name}' created at {repo.html_url}")
 
     # 5 - Push code to repo
+    push_code(llm_response, repo)
 
     # 6 - Enable Github pages
 
     # 7. Post to evaluation url
+    print("Process completed.")
 
 
 @router.post("/build")

@@ -6,5 +6,5 @@ Only output JSON matching this schema:
 {
   "README.md": "<markdown text>",
   "LICENSE": "<MIT License text>",
-  "main.py" or "index.html": "<app code>"
+  "main.py": "<app code>"
 }

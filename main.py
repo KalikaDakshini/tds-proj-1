@@ -3,7 +3,6 @@
 from fastapi import FastAPI
 
 from app.routes import router
-from app.services.llm import generate_app
 
 
 app = FastAPI()

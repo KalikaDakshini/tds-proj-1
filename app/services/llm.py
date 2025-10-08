@@ -17,6 +17,7 @@ def load_prompt(template: str) -> str:
 def generate_app(brief: str) -> LLMResponse:
     """Generate an app based on brief using OpenAI"""
     # Initiate client and query the OpenAI model
+    print("Querying LLM...")
     client = OpenAI(api_key=Environ.OPENAI_API_KEY)
     response = client.responses.create(
         model="gpt-4.1-nano",
