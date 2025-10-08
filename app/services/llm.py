@@ -14,15 +14,15 @@ def load_prompt(template: str) -> str:
         return tf.read()
 
 
-def generate_app(brief: str) -> LLMResponse:
+def generate_app(brief: str, checks: str) -> LLMResponse:
     """Generate an app based on brief using OpenAI"""
     # Initiate client and query the OpenAI model
     print("Querying LLM...")
     client = OpenAI(api_key=Environ.OPENAI_API_KEY)
+    instructions = load_prompt("instructions.txt").format(checks=checks)
+    user_input = load_prompt("input.txt").format(brief=brief)
     response = client.responses.create(
-        model="gpt-4.1-nano",
-        instructions=load_prompt("instructions.txt"),
-        input=load_prompt("input.txt").format(brief=brief),
+        model="gpt-4.1-nano", instructions=instructions, input=user_input
     )
 
     # Return response as pydantic model

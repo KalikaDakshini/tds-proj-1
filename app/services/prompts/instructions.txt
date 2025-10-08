@@ -3,8 +3,13 @@ Return a minimal, professional, runnable app as JSON.
 Do NOT include Markdown, explanations, or prose.
 Only output JSON matching this schema:
 
-{
+{{
   "README.md": "<markdown text>",
   "LICENSE": "<MIT License text>",
-  "main.py": "<app code>"
-}
+  "index.html": "<HTML/CSS code>"
+  "script.js": "Javascript code"
+}}
+
+Your output should additionally satisfy the following checks
+{checks}
+

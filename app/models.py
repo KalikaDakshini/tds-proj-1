@@ -22,4 +22,5 @@ class LLMResponse(BaseModel):
 
     README: str = Field(..., alias="README.md", title="README.md")
     License: str = Field(..., alias="LICENSE", title="LICENSE")
-    main_code: str = Field(..., alias="main.py", title="main.py")
+    html_code: str = Field(..., alias="index.html", title="index.html")
+    json_code: str = Field(..., alias="script.js", title="script.js")
