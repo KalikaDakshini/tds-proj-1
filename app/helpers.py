@@ -56,7 +56,7 @@ def finalize(request: Payload, repo: Repository):
 def parse_attachments(attachments: list[Attachment]) -> dict[str, bytes]:
     """Parse attachments from the request."""
     return {
-        a.name: base64.b64decode(a.data.split(";")[-1]) for a in attachments
+        a.name: base64.b64decode(a.data.split(",")[-1]) for a in attachments
     }
 
 
