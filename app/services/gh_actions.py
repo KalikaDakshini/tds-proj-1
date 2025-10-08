@@ -62,7 +62,7 @@ def enable_pages(repo: Repository):
     # Check if pages is live
     iter_count = 0
     pages_url = f"https://{owner}.github.io/{repo_name}/"
-    while requests.get(pages_url, timeout=5).status_code != 200:
+    while not requests.get(pages_url, timeout=5).ok:
         time.sleep(3)
         if iter_count > 30:
             print("Timed out waiting for Github Pages")

@@ -1,7 +1,11 @@
 """App routes module"""
 
+import time
+import requests
+from requests.exceptions import RequestException
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
+from github.Repository import Repository
 
 from .models import Payload
 from .services.gh_actions import create_repo, push_code, enable_pages
@@ -9,6 +13,48 @@ from .services.llm import generate_app
 from .config import Environ
 
 router = APIRouter()
+
+
+def finalize(request: Payload, repo: Repository):
+    """Send a POST request to evaluation URL with repository details."""
+    # Build data
+    owner, repo_name = repo.full_name.split("/")
+    data = {
+        "email": request.email,
+        "task": request.task,
+        "round": 1,
+        "nonce": request.nonce,
+        "repo_url": f"https://github.com/{owner}/{repo_name}",
+        "commit_sha": repo.get_commits()[0].sha,
+        "pages_url": "https://{owner}.github.io/{repo_name}/",
+    }
+    # Build header
+    headers = {
+        "Content-Type": "application/json",
+    }
+    # Send POST requests till successful
+    delay = 1
+    while True:
+        try:
+            response = requests.post(
+                url=request.evaluation_url,
+                json=data,
+                headers=headers,
+                timeout=5,
+            )
+            # Break if succesful
+            if response.ok:
+                print("Posted to evaluation URL")
+                break
+            print(f"POST request failed. Retrying in {delay} seconds...")
+        except RequestException as err:
+            print(
+                f"POST request failed with {err.errno}. Retrying in {delay} seconds..."
+            )
+
+        # Retry POST
+        time.sleep(delay)
+        delay = delay * 2 if delay < 16 else 16
 
 
 def process_request(request: Payload):
@@ -30,6 +76,7 @@ def process_request(request: Payload):
     enable_pages(repo)
 
     # 7. Post to evaluation url
+    finalize(request, repo)
     print("Process completed.")
 
 
