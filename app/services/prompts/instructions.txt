@@ -6,10 +6,10 @@ Only output JSON matching this schema:
 {{
   "README.md": "<markdown text>",
   "LICENSE": "<MIT License text>",
-  "index.html": "<HTML/CSS code>"
-  "script.js": "Javascript code"
+  "index.html": "HTML/CSS code"
+  "script.js": "Javascript code if needed"
+  "main.py": "Python backend for web apps if needed"
 }}
 
-Your output should additionally satisfy the following checks
+Your output should satisfy the following checks
 {checks}
-

@@ -68,7 +68,23 @@ Example request (curl):
 ```bash
 curl -X POST http://127.0.0.1:8000/build \
 	-H "Content-Type: application/json" \
-	-d '{"secret":"your-secret-key", "round": 1, "brief": "Create a TODO app with Flask"}'
+	-d '{
+		"email": "22f2001238@ds.study.iitm.ac.in",
+		"secret": "tds-secret",
+		"task": "markdown-to-html-ab12",
+		"round": 1,
+		"nonce": "ab12",
+		"brief": "Publish a static page that converts input.md from attachments to HTML with marked, renders it inside",
+		"checks": [
+			"!!document.querySelector(\"script[src*='marked']\")",
+			"!!document.querySelector(\"script[src*='highlight.js']\")",
+			"document.querySelector(\"#markdown-output\").innerHTML.includes(\"<h\")"
+		],
+		"evaluation_url": "http://localhost:5000",
+		"attachments": [
+			{ "name": "input.md", "url": "data:text/markdown; {base64 code}" }
+		]
+	}'
 ```
 
 Expected responses:

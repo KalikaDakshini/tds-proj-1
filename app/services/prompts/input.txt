@@ -2,7 +2,6 @@ App brief:
 {brief}
 
 Requirements:
-- Code must run or render directly with no external files.
+- The final application must run directly out of the box with no third-party installation required. This is very important
 - README.md must include summary, setup, usage, and license section.
 - LICENSE must be MIT.
-- Keep code concise and well-commented.

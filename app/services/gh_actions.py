@@ -30,14 +30,23 @@ def create_repo(name: str) -> Repository:
     return repo
 
 
-def push_code(llm_response: LLMResponse, repo: Repository):
+def push_code(
+    llm_response: LLMResponse, repo: Repository, attachments: dict[str, bytes]
+):
     """Push code files to Github Repo"""
-    print("Pushing code to repository...")
+    print("Pushing files to repository...")
     for field_name, field in type(llm_response).model_fields.items():
         file_content = getattr(llm_response, field_name)
         file_name = field.title if field.title else field_name
+        if file_content:
+            repo.create_file(
+                file_name, f"Add {file_name}", file_content, branch="main"
+            )
+
+    # PUsh attachments to repository
+    for file_name, file_data in attachments.items():
         repo.create_file(
-            file_name, f"Add {file_name}", file_content, branch="main"
+            file_name, f"Add {file_name}", file_data, branch="main"
         )
 
 

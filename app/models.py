@@ -1,6 +1,14 @@
 """Models for the application."""
 
+from typing import Optional
 from pydantic import BaseModel, Field
+
+
+class Attachment(BaseModel):
+    """Attachmennt model for incoming requests."""
+
+    name: str
+    data: str = Field(..., alias="url")
 
 
 class Payload(BaseModel):
@@ -14,7 +22,7 @@ class Payload(BaseModel):
     brief: str
     checks: list[str]
     evaluation_url: str
-    attachments: list[dict]
+    attachments: list[Attachment]
 
 
 class LLMResponse(BaseModel):
@@ -23,4 +31,7 @@ class LLMResponse(BaseModel):
     README: str = Field(..., alias="README.md", title="README.md")
     License: str = Field(..., alias="LICENSE", title="LICENSE")
     html_code: str = Field(..., alias="index.html", title="index.html")
-    json_code: str = Field(..., alias="script.js", title="script.js")
+    json_code: Optional[str] = Field(
+        None, alias="script.js", title="script.js"
+    )
+    python_code: Optional[str] = Field(None, alias="main.py", title="main.py")
