@@ -1,6 +1,6 @@
 # LLM App Builder — FastAPI
 
-This repository contains a small FastAPI application that exposes an API to **build** application artifacts using large language models (LLMs). The service accepts build requests that include a brief and a round identifier, and delegates orchestration to components under `app/` (models, prompts, services, routes).
+This repository contains a small FastAPI application that exposes an API to **build** application artifacts using large language models (LLMs). The service accepts build requests that include a task and a brief, builds an application, hosts it on Github, and deploys it to Github Pages
 
 This README explains the project layout, how to run the app locally, how to call the `/build` endpoint, and tips for development and deployment.
 
@@ -36,32 +36,24 @@ App package (`app/`)
 
 ## Environment variables
 
-Set at least the following environment variable before running the app:
+Set the following environment variables in a `.env` file before running the app:
 
-- `API_SECRET` — shared secret used to authorize `POST /build` requests.
-
-Other environment variables (LLM API keys, storage credentials) should be set as required by services under `app/services`.
-
-Example:
-
-```bash
-export API_SECRET="your-secret-key"
-```
+- `API_SECRET` - secret used to authorize `POST /build` requests.
+- `GITHUB_TOKEN` - personal access token used to **read/write** to github repos .
+- `OPEN_API_KEY` - secret used to **query** OpenAI models
 
 ## Install and run locally
 
-Create and activate a virtual environment and install the dependencies:
+Create and activate a virtual environment and install the dependencies using uv:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv init
+uv add -r requirements.txt
 ```
 
-Run the server with uvicorn (reload enabled for development):
+Run the server with uvicorn:
 
 ```bash
-export API_SECRET="your-secret-key"
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -81,10 +73,10 @@ curl -X POST http://127.0.0.1:8000/build \
 
 Expected responses:
 
-- 200 OK — request accepted; returns a JSON body (for example echoing `round` and `brief` or a build result).
-- 403 Forbidden — when the provided `secret` does not match `API_SECRET`.
+- 200 OK - request accepted; returns a JSON body (for example echoing `round` and `brief` or a build result).
+- 401 Unauthorized access - when the provided `secret` does not match `API_SECRET`.
 
-Notes: The route has been implemented to explicitly return HTTP 200 on success and raise HTTP 403 on secret mismatch.
+Notes: The route has been implemented to explicitly return HTTP 200 on success and raise HTTP 401 on secret mismatch.
 
 ## Docker
 
@@ -92,14 +84,5 @@ Build and run the container:
 
 ```bash
 docker build -t app-builder .
-docker run -e API_SECRET="your-secret-key" -p 8000:8000 llm-app-builder
+docker run -e .env -p 8000:8000 app-builder
 ```
-
-Adjust the Dockerfile or docker run flags to provide any LLM API keys or other secrets needed by `app/services`.
-
-## Development notes and best practices
-
-- Keep route handlers thin; move orchestration into `app/services` so it's easy to unit test.
-- Store prompt templates in `app/prompts` and load them from services.
-- Use environment variables for all credentials and avoid checking secrets into source control.
-- Add unit tests for services and integration tests for routes.
