@@ -1,14 +1,30 @@
+---
+title: TDS Project Evaluator
+emoji: ⚙️
+colorFrom: gray
+colorTo: blue
+sdk: docker
+sdk_version: "1.0"
+app_file: main.py
+pinned: false
+---
+
 # LLM App Builder — FastAPI
 
-This repository contains a small FastAPI application that exposes an API to **build** application artifacts using large language models (LLMs). The service accepts build requests that include a task and a brief, builds an application, hosts it on Github, and deploys it to Github Pages
+This repository contains a small FastAPI application that exposes an API to
+**build** application artifacts using large language models (LLMs). The service
+accepts build requests that include a task and a brief, builds an application,
+hosts it on Github, and deploys it to Github Pages
 
-This README explains the project layout, how to run the app locally, how to call the `/build` endpoint, and tips for development and deployment.
+This README explains the project layout, how to run the app locally, how to
+call the `/build` endpoint, and tips for development and deployment.
 
 ## Quick summary
 
 - Framework: FastAPI
 - Entry point: `main.py`
-- App package: `app/` (contains `models.py`, `routes/`, `services/`, `prompts/`)
+- App package: `app/` (contains `models.py`, `routes/`, `services/`,
+  `prompts/`)
 - Config: `config.py`
 - Container: `Dockerfile`
 
@@ -24,7 +40,8 @@ Top-level files
 
 App package (`app/`)
 
-- `models.py` — Pydantic models for request/response validation (e.g. `Payload` used by `/build`).
+- `models.py` — Pydantic models for request/response validation (e.g. `Payload`
+  used by `/build`).
 - `routes/` — API routes; `api/routes.py` includes the `/build` endpoint.
 - `services/` — business logic, LLM client wrappers, builders, and helpers.
 - `prompts/` — prompt templates for guiding LLMs.
@@ -36,15 +53,18 @@ App package (`app/`)
 
 ## Environment variables
 
-Set the following environment variables in a `.env` file before running the app:
+Set the following environment variables in a `.env` file before running the
+app:
 
 - `API_SECRET` - secret used to authorize `POST /build` requests.
-- `GITHUB_TOKEN` - personal access token used to **read/write** to github repos .
+- `GITHUB_TOKEN` - personal access token used to **read/write** to github repos
+  .
 - `OPEN_API_KEY` - secret used to **query** OpenAI models
 
 ## Install and run locally
 
-Create and activate a virtual environment and install the dependencies using uv:
+Create and activate a virtual environment and install the dependencies using
+uv:
 
 ```bash
 uv init
@@ -61,7 +81,9 @@ Open the interactive Swagger UI at: http://127.0.0.1:8000/docs
 
 ## POST /build — endpoint
 
-This endpoint accepts a JSON payload describing the build request. The exact Pydantic model lives in `app/models.py` (commonly named `Payload`) and will contain fields like `secret`, `round`, and `brief`.
+This endpoint accepts a JSON payload describing the build request. The exact
+Pydantic model lives in `app/models.py` (commonly named `Payload`) and will
+contain fields like `secret`, `round`, and `brief`.
 
 Example request (curl):
 
@@ -89,10 +111,13 @@ curl -X POST http://127.0.0.1:8000/build \
 
 Expected responses:
 
-- 200 OK - request accepted; returns a JSON body (for example echoing `round` and `brief` or a build result).
-- 401 Unauthorized access - when the provided `secret` does not match `API_SECRET`.
+- 200 OK - request accepted; returns a JSON body (for example echoing `round`
+  and `brief` or a build result).
+- 401 Unauthorized access - when the provided `secret` does not match
+  `API_SECRET`.
 
-Notes: The route has been implemented to explicitly return HTTP 200 on success and raise HTTP 401 on secret mismatch.
+Notes: The route has been implemented to explicitly return HTTP 200 on success
+and raise HTTP 401 on secret mismatch.
 
 ## Docker
 
