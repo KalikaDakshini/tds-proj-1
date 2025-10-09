@@ -22,7 +22,7 @@ def finalize(request: Payload, repo: Repository):
         "nonce": request.nonce,
         "repo_url": f"https://github.com/{owner}/{repo_name}",
         "commit_sha": repo.get_commits()[0].sha,
-        "pages_url": "https://{owner}.github.io/{repo_name}/",
+        "pages_url": f"https://{owner}.github.io/{repo_name}/",
     }
     # Build header
     headers = {
