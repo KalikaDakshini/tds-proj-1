@@ -1,7 +1,7 @@
 """Github Actions"""
 
 import time
-import requests
+import httpx
 from github import Github, Auth, UnknownObjectException
 from github.Repository import Repository
 
@@ -54,28 +54,38 @@ def enable_pages(repo: Repository):
     """Enable Github Pages for the repository"""
     # Push a request to enable Github Pages
     owner, repo_name = repo.full_name.split("/")
-    url = f"https://api.github.com/repos/{owner}/{repo_name}/pages"
+    post_url = f"https://api.github.com/repos/{owner}/{repo_name}/pages"
     headers = {
         "Authorization": f"Bearer {Environ.GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json",
     }
     data = {"source": {"branch": "main", "path": "/"}, "build_type": "legacy"}
-    response = requests.post(url, json=data, headers=headers, timeout=10)
 
-    # Check status code
-    if response.status_code == 201:
-        print("Github pages enabled")
-    else:
-        print(response.json())
+    # Enable Github Pages
+    try:
+        response = httpx.post(post_url, json=data, headers=headers, timeout=10)
+        if response.status_code == 201:
+            print("Pages enabled successfully")
+        else:
+            print(
+                f"Github API responsed with {response.status_code}: {response.text}"
+            )
+    except httpx.RequestError as e:
+        print(f"Network error enabling Pages {e}")
 
     # Check if pages is live
-    iter_count = 0
     pages_url = f"https://{owner}.github.io/{repo_name}/"
-    while not requests.get(pages_url, timeout=5).ok:
-        time.sleep(3)
-        if iter_count > 30:
-            print("Timed out waiting for Github Pages")
-            break
-        iter_count += 1
-    else:
-        print(f"Github Pages is live at {pages_url}")
+    print("Waiting for GitHub Pages to go live...")
+
+    # Try for 150 seconds
+    for _ in range(30):
+        try:
+            r = httpx.get(pages_url, timeout=5)
+            if r.status_code == 200:
+                print(f"GitHub Pages is live at {pages_url}")
+                return
+        except httpx.RequestError:
+            pass
+        time.sleep(5)
+
+    print("Timed out waiting for GitHub Pages to go live.")

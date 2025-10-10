@@ -2,9 +2,8 @@
 
 import base64
 import time
-import requests
+import httpx
 
-from requests.exceptions import RequestException
 from github.Repository import Repository
 from .services.gh_actions import create_repo, push_code, enable_pages
 from .services.llm import generate_app
@@ -32,20 +31,20 @@ def finalize(request: Payload, repo: Repository):
     delay = 1
     while True:
         try:
-            response = requests.post(
+            response = httpx.post(
                 url=request.evaluation_url,
                 json=data,
                 headers=headers,
-                timeout=5,
+                timeout=10,
             )
             # Break if succesful
-            if response.ok:
+            if response.status_code == 200:
                 print("Posted to evaluation URL")
                 break
             print(f"POST request failed. Retrying in {delay} seconds...")
-        except RequestException as err:
+        except httpx.RequestError as err:
             print(
-                f"POST request failed with {err.errno}. Retrying in {delay} seconds..."
+                f"POST request failed with: {err}. Retrying in {delay} seconds..."
             )
 
         # Retry POST
