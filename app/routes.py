@@ -4,8 +4,8 @@ from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from .models import Payload
-from .config import Environ
 from .helpers import process_request
+from .services import Environ
 
 router = APIRouter()
 

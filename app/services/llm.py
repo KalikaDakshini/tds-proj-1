@@ -4,7 +4,7 @@ from pathlib import Path
 from openai import OpenAI
 
 from app.models import LLMResponse
-from app.config import Environ
+from .config import Environ
 
 
 def load_prompt(template: str) -> str:

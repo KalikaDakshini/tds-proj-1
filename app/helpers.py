@@ -3,10 +3,9 @@
 import base64
 import time
 import httpx
-
 from github.Repository import Repository
-from .services.gh_actions import create_repo, push_code, enable_pages
-from .services.llm import generate_app
+
+from .services import create_repo, push_code, enable_pages, generate_app
 from .models import Payload, Attachment
 
 

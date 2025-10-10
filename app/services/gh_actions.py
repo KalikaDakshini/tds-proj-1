@@ -5,8 +5,8 @@ import httpx
 from github import Github, Auth, UnknownObjectException
 from github.Repository import Repository
 
-from app.config import Environ
 from app.models import LLMResponse
+from .config import Environ
 
 
 def create_repo(name: str) -> Repository:
