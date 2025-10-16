@@ -1,5 +1,5 @@
 ---
-title: TDS Project Evaluator
+title: TDS Project 1
 emoji: ⚙️
 colorFrom: gray
 colorTo: blue
@@ -93,7 +93,7 @@ curl -X POST http://127.0.0.1:8000/build \
 	-H "Content-Type: application/json" \
 	-d '{
 		"email": "22f2001238@ds.study.iitm.ac.in",
-		"secret": "tds-secret",
+		"secret": "your-secret-key",
 		"task": "markdown-to-html-ab12",
 		"round": 1,
 		"nonce": "ab12",
