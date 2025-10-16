@@ -30,8 +30,8 @@ async def generate_app(brief: str, checks: str) -> LLMResponse:
         read_tasks = await asyncio.gather(*[load_prompt(text) for text in texts])
 
         # TODO(kalika): Change this to structured output
-        instructions = read_tasks[0].format(checks)
-        user_input = read_tasks[1].format(brief)
+        instructions = read_tasks[0].format(checks=checks)
+        user_input = read_tasks[1].format(brief=brief)
 
         # Query the model
         response = await client.responses.create(
