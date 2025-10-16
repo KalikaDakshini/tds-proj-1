@@ -27,7 +27,7 @@ async def build(request: Payload, tasks: BackgroundTasks) -> JSONResponse:
         )
 
     # Process task in the background asynchronously
-    tasks.add_task(asyncio.to_thread, process_request, request)
+    tasks.add_task(lambda: asyncio.run(process_request(request)))
 
     # Return a JSON response confirming receipt
     return JSONResponse(
