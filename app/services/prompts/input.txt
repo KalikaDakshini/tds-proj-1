@@ -3,5 +3,5 @@ App brief:
 
 Requirements:
 - The final application must run directly out of the box with no third-party installation required.
-- README.md must include summary, setup, usage, and license section.
 - LICENSE must be MIT. Fetch and add the contents of the license.
+- README.md should be a description of every file and feature of the project

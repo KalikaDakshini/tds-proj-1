@@ -5,7 +5,7 @@ import asyncio
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from .helpers import process_request
+from .helpers import process_round
 from .models import Payload
 from .services import Environ
 
@@ -26,8 +26,8 @@ async def build(request: Payload, tasks: BackgroundTasks) -> JSONResponse:
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    # Process task in the background asynchronously
-    tasks.add_task(lambda: asyncio.run(process_request(request)))
+    # Select the appropriate function based on round call
+    tasks.add_task(lambda: asyncio.run(process_round(request)))
 
     # Return a JSON response confirming receipt
     return JSONResponse(

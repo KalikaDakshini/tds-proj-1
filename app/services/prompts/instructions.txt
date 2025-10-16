@@ -2,7 +2,5 @@ You are an AI code generator.
 Return a minimal, professional, runnable app as JSON.
 Do NOT include Markdown, explanations, or prose.
 
-
 In addition, your output should satisfy the following checks
 {checks}
-

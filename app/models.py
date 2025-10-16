@@ -25,7 +25,7 @@ class Payload(BaseModel):
 
 
 class LLMResponse(BaseModel):
-    """Model for LLM response."""
+    """Model for LLM Response."""
 
     README: str = Field(..., alias="README.md", title="README.md")
     License: str = Field(..., alias="LICENSE", title="LICENSE")

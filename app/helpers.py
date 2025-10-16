@@ -8,7 +8,15 @@ import httpx
 from github.Repository import Repository
 
 from .models import Attachment, Payload
-from .services import create_repo, enable_pages, generate_app, push_code
+from .services import (
+    create_repo,
+    enable_pages,
+    generate_app,
+    get_repo,
+    push_code,
+    redeploy_pages,
+    update_code,
+)
 
 
 def finalize(request: Payload, repo: Repository) -> None:
@@ -57,27 +65,39 @@ def parse_attachments(attachments: list[Attachment]) -> dict[str, bytes]:
     return {a.name: base64.b64decode(a.data.split(",")[-1]) for a in attachments}
 
 
-async def process_request(request: Payload) -> None:
+async def process_round(request: Payload) -> None:
     """Process the incoming request in the background."""
     # 4 - Parse the attachments
     attachments = parse_attachments(request.attachments)
 
     # 4 - Use LLM to generate app
     checks = "\n".join(f"- {check}" for check in request.checks)
+
+    # Generate LLM response
     llm_task = asyncio.create_task(generate_app(request.brief, checks))
 
-    # 5 - Create Github repo
-    github_task = asyncio.create_task(create_repo(request.task))
+    if request.round_ == 1:
+        # 5 - Create Github repo
+        github_task = asyncio.create_task(create_repo(request.task))
+    else:
+        # Get the repo from task name
+        github_task = asyncio.create_task(get_repo(request.task))
 
-    # await tasks
-    llm_response, repo = await asyncio.gather(*(llm_task, github_task))
-    print(f"Repository '{repo.name}' created at {repo.html_url}")
+    # Await tasks
+    llm_response = await llm_task
+    repo = await github_task
 
     # 5 - Push code to repo
-    push_code(llm_response, repo, attachments)
+    if request.round_ == 1:
+        push_code(llm_response, repo, attachments)
+    else:
+        update_code(llm_response, repo, attachments)
 
-    # 6 - Enable Github pages
-    enable_pages(repo)
+    # 6 - Enable Github pages on round 1
+    if request.round_ == 1:
+        enable_pages(repo)
+    else:
+        redeploy_pages(repo)
 
     # 7. Post to evaluation url
     finalize(request, repo)
