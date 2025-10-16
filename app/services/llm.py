@@ -5,17 +5,18 @@ from pathlib import Path
 
 import aiofiles
 from openai import AsyncOpenAI
+from pydantic import ValidationError
 
 from app.models import LLMResponse
 
 from .config import Environ
 
 
-async def load_prompt(template: str) -> str:
+async def load_prompt(template: str, **kwargs: str) -> str:
     """Load a prompt from template file."""
     template_path = Path(__file__).parent / "prompts" / template
     async with aiofiles.open(template_path, encoding="utf-8") as tf:
-        return await tf.read()
+        return (await tf.read()).format(**kwargs)
 
 
 async def generate_app(brief: str, checks: str) -> LLMResponse:
@@ -26,19 +27,23 @@ async def generate_app(brief: str, checks: str) -> LLMResponse:
         api_key=Environ.OPENAI_API_KEY, base_url="https://aipipe.org/openai/v1"
     ) as client:
         # Get user input
-        texts = ["instructions.txt", "input.txt"]
-        read_tasks = await asyncio.gather(*[load_prompt(text) for text in texts])
+        instructions, user_input = await asyncio.gather(
+            *(
+                load_prompt("instructions.txt", checks=checks),
+                load_prompt("input.txt", brief=brief),
+            )
+        )
 
-        # TODO(kalika): Change this to structured output
-        instructions = read_tasks[0].format(checks=checks)
-        user_input = read_tasks[1].format(brief=brief)
-
-        # Query the model
-        response = await client.responses.create(
-            model="gpt-4.1-nano",
+        response = await client.responses.parse(
+            model="gpt-4o-mini",
             instructions=instructions,
             input=user_input,
+            text_format=LLMResponse,
+            temperature=0.0,
         )
 
     # Return response as pydantic model
-    return LLMResponse.model_validate_json(response.output_text)
+    if not response.output_parsed:
+        raise ValidationError("Empty Response")
+
+    return response.output_parsed

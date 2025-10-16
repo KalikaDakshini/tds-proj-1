@@ -23,3 +23,7 @@ app.add_middleware(
 async def index() -> dict:
     """Home page."""
     return {"message": "Welcome to Kalika's App Builder"}
+
+
+if __name__ == "__main__":
+    pass
