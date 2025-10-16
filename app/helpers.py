@@ -1,15 +1,17 @@
-"""Helper functions"""
+"""Helper functions."""
 
+import asyncio
 import base64
 import time
+
 import httpx
 from github.Repository import Repository
 
-from .services import create_repo, push_code, enable_pages, generate_app
-from .models import Payload, Attachment
+from .models import Attachment, Payload
+from .services import create_repo, enable_pages, generate_app, push_code
 
 
-def finalize(request: Payload, repo: Repository):
+def finalize(request: Payload, repo: Repository) -> None:
     """Send a POST request to evaluation URL with repository details."""
     # Build data
     owner, repo_name = repo.full_name.split("/")
@@ -37,38 +39,38 @@ def finalize(request: Payload, repo: Repository):
                 timeout=10,
             )
             # Break if succesful
-            if response.status_code == 200:
+            if response.status_code == httpx.codes.OK:
                 print("Posted to evaluation URL")
                 break
             print(f"POST request failed. Retrying in {delay} seconds...")
         except httpx.RequestError as err:
-            print(
-                f"POST request failed with: {err}. Retrying in {delay} seconds..."
-            )
+            print(f"POST request failed with: {err}. Retrying in {delay} seconds...")
 
         # Retry POST
+        max_delay: int = 64
         time.sleep(delay)
-        delay = delay * 2 if delay < 64 else 64
+        delay = delay * 2 if delay < max_delay else max_delay
 
 
 def parse_attachments(attachments: list[Attachment]) -> dict[str, bytes]:
     """Parse attachments from the request."""
-    return {
-        a.name: base64.b64decode(a.data.split(",")[-1]) for a in attachments
-    }
+    return {a.name: base64.b64decode(a.data.split(",")[-1]) for a in attachments}
 
 
-def process_request(request: Payload):
+async def process_request(request: Payload) -> None:
     """Process the incoming request in the background."""
     # 4 - Parse the attachments
     attachments = parse_attachments(request.attachments)
 
     # 4 - Use LLM to generate app
     checks = "\n".join(f"- {check}" for check in request.checks)
-    llm_response = generate_app(request.brief, checks)
+    llm_task = asyncio.create_task(generate_app(request.brief, checks))
 
     # 5 - Create Github repo
-    repo = create_repo(request.task)
+    github_task = asyncio.create_task(create_repo(request.task))
+
+    # await tasks
+    llm_response, repo = await asyncio.gather(*(llm_task, github_task))
     print(f"Repository '{repo.name}' created at {repo.html_url}")
 
     # 5 - Push code to repo

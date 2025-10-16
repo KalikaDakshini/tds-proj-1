@@ -1,6 +1,5 @@
 """Models for the application."""
 
-from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -26,12 +25,10 @@ class Payload(BaseModel):
 
 
 class LLMResponse(BaseModel):
-    """Model for LLM response"""
+    """Model for LLM response."""
 
     README: str = Field(..., alias="README.md", title="README.md")
     License: str = Field(..., alias="LICENSE", title="LICENSE")
     html_code: str = Field(..., alias="index.html", title="index.html")
-    json_code: Optional[str] = Field(
-        None, alias="script.js", title="script.js"
-    )
-    python_code: Optional[str] = Field(None, alias="main.py", title="main.py")
+    json_code: str | None = Field(None, alias="script.js", title="script.js")
+    python_code: str | None = Field(None, alias="main.py", title="main.py")

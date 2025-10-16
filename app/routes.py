@@ -1,19 +1,20 @@
-"""App routes module"""
+"""App routes."""
+
+import asyncio
 
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from .models import Payload
 from .helpers import process_request
+from .models import Payload
 from .services import Environ
 
 router = APIRouter()
 
 
 @router.post("/build")
-async def build(request: Payload, tasks: BackgroundTasks):
-    """App build endpoint"""
-
+async def build(request: Payload, tasks: BackgroundTasks) -> JSONResponse:
+    """App build endpoint."""
     # Get and validate secret key
     secret_key = Environ.API_SECRET
     if not secret_key:
@@ -25,8 +26,8 @@ async def build(request: Payload, tasks: BackgroundTasks):
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    # Process task in the background
-    tasks.add_task(process_request, request)
+    # Process task in the background asynchronously
+    tasks.add_task(asyncio.to_thread, process_request, request)
 
     # Return a JSON response confirming receipt
     return JSONResponse(
