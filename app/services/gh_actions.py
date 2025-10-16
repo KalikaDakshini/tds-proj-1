@@ -163,32 +163,45 @@ def enable_pages(repo: Repository) -> None:
 
 
 def redeploy_pages(repo: Repository) -> dict:
-    """Trigger a GitHub Pages build for a repo via REST API."""
+    """Trigger a GitHub Pages build and wait for it to finish."""
     owner = repo.owner.login.lower()
     name = repo.name.lower()
-    # Send a post request to Github Pages
-    base_url = f"https://api.github.com/repos/{owner}/{name}/pages/builds"
+    token = Environ.GITHUB_TOKEN
+
     headers = {
         "Accept": "application/vnd.github+json",
-        "Authorization": f"Bearer {Environ.GITHUB_TOKEN}",
+        "Authorization": f"Bearer {token}",
     }
-    # Check response and return
-    resp = httpx.post(base_url, headers=headers, timeout=10)
+    base_url = f"https://api.github.com/repos/{owner}/{name}/pages"
+
+    # Check if a build is already running
+    r = httpx.get(f"{base_url}/builds/latest", headers=headers, timeout=10)
+    if r.status_code == httpx.codes.OK:
+        status = r.json().get("status")
+        if status in ("queued", "building"):
+            print(f"A Pages build is already in progress (status={status}). Waiting...")
+            while status in ("queued", "building"):
+                time.sleep(5)
+                r = httpx.get(f"{base_url}/builds/latest", headers=headers, timeout=10)
+                status = r.json().get("status")
+
+    # Trigger a new build
+    resp = httpx.post(f"{base_url}/builds", headers=headers, timeout=10)
     try:
         resp.raise_for_status()
         pages_url = f"https://{owner}.github.io/{name}"
-        print(f"Redeploying Github Pages at {pages_url}")
+        print(f"Redeploying GitHub Pages at {pages_url}")
     except httpx.HTTPError as err:
-        print(f"Failed to redeploy Github Pages: {err}")
+        print(f"Failed to trigger Pages build: {err}")
+        return {}
 
-    # Wait for pages to finish deployment
+    # Wait for the new build to finish
     while True:
-        r = httpx.get(f"{base_url}/latest", headers=headers)
+        r = httpx.get(f"{base_url}/builds/latest", headers=headers, timeout=10)
         status = r.json().get("status", "unknown")
         if status in ("built", "errored"):
             break
-        time.sleep(5)
+        time.sleep(10)
 
     print("Deployment finished." if status == "built" else "Deployment failed.")
-
     return resp.json()
